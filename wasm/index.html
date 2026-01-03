@@ -1,20 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decentralized DB - WASM Demo</title>
-    <script src="wasm_exec.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decentralized DB - WASM Demo</title>
 </head>
 <body>
-    <h1>🌐 Decentralized DB - Browser Demo</h1>
-    <p>TODO: Phase 6 - WASM integration</p>
-    
-    <div id="status">Loading...</div>
-    
-    <script>
-        // TODO: Load and initialize WASM module
-        document.getElementById('status').textContent = 'WASM support coming in Phase 6!';
-    </script>
+  <h1>🌐 Decentralized DB - Browser Demo</h1>
+  <div id="status">Loading Go WASM…</div>
+
+  <script src="wasm_exec.js"></script>
+  <script>
+    if (!WebAssembly.instantiateStreaming) {
+      WebAssembly.instantiateStreaming = async (resp, importObject) => {
+        const source = await (await resp).arrayBuffer();
+        return await WebAssembly.instantiate(source, importObject);
+      };
+    }
+
+    const go = new Go();
+
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+      .then((result) => {
+        document.getElementById("status").textContent = "Go WASM running ✅";
+        go.run(result.instance);
+      })
+      .catch((err) => {
+        document.getElementById("status").textContent = "Failed ❌";
+        console.error(err);
+      });
+  </script>
+  <script>
+async function saveOp(op) {
+  const db = await indexedDB.open("db", 1)
+  db.onupgradeneeded = () =>
+    db.result.createObjectStore("ops", { keyPath: "id" })
+}
+</script>
+<script>
+const ws = new WebSocket("ws://localhost:8081/ws")
+
+ws.onmessage = (e) => {
+  window.applyOp(e.data)
+}
+
+function sendOp(op) {
+  ws.send(JSON.stringify(op))
+}
+</script>
 </body>
 </html>

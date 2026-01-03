@@ -6,33 +6,26 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var clients = make(map[*websocket.Conn]bool)
-var broadcast = make(chan []byte)
+var peers = map[*websocket.Conn]bool{}
+var up = websocket.Upgrader{CheckOrigin: func(*http.Request) bool { return true }}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	c, _ := up.Upgrade(w, r, nil)
+	peers[c] = true
+
+	for {
+		_, msg, err := c.ReadMessage()
+		if err != nil {
+			delete(peers, c)
+			return
+		}
+		for p := range peers {
+			p.WriteMessage(websocket.TextMessage, msg)
+		}
+	}
+}
 
 func main() {
-	upgrader := websocket.Upgrader{CheckOrigin: func(*http.Request) bool { return true }}
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, _ := upgrader.Upgrade(w, r, nil)
-		clients[conn] = true
-
-		for {
-			_, msg, err := conn.ReadMessage()
-			if err != nil {
-				delete(clients, conn)
-				return
-			}
-			broadcast <- msg
-		}
-	})
-
-	go func() {
-		for msg := range broadcast {
-			for c := range clients {
-				c.WriteMessage(websocket.TextMessage, msg)
-			}
-		}
-	}()
-
-	http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/ws", handler)
+	http.ListenAndServe(":8081", nil)
 }

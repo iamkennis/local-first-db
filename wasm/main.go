@@ -1,8 +1,29 @@
+//go:build js && wasm
 package main
 
-// TODO: Phase 6 - Implement WASM entry point
+import (
+	"encoding/json"
+	"syscall/js"
+
+	"github.com/iamkennis/decentralized-db/core"
+)
+
+var store = core.NewStore()
+
+func applyOp(this js.Value, args []js.Value) any {
+	var op core.Operation
+	json.Unmarshal([]byte(args[0].String()), &op)
+	store.Apply(op)
+	return nil
+}
+
+func state(this js.Value, args []js.Value) any {
+	b, _ := json.Marshal(store.State())
+	return string(b)
+}
 
 func main() {
-	// This will be compiled to WASM
-	// GOOS=js GOARCH=wasm go build -o main.wasm wasm/main.go
+	js.Global().Set("applyOp", js.FuncOf(applyOp))
+	js.Global().Set("getState", js.FuncOf(state))
+	select {}
 }

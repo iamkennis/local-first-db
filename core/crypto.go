@@ -6,13 +6,11 @@ import (
 	"crypto/rand"
 )
 
-func Encrypt(data, key []byte) ([]byte, error) {
+func Encrypt(key, data []byte) ([]byte, error) {
 	block, _ := aes.NewCipher(key)
 	gcm, _ := cipher.NewGCM(block)
-
 	nonce := make([]byte, gcm.NonceSize())
 	rand.Read(nonce)
-
 	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 

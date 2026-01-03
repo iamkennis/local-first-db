@@ -38,37 +38,51 @@ Inspired by systems like Figma, Notion, Linear, and modern local-first architect
 
 ## Architecture Overview
 
-Browser
-┌──────────────────────────────┐
-│ UI (JS / React)              │
-│                              │
-│ IndexedDB (append-only log)  │
-│        ▲                     │
-│        │                     │
-│ Go Core (WASM)               │
-│ - Ops                        │
-│ - Merge                      │
-│ - Crypto                     │
-└────────┬─────────────────────┘
-│
-▼
-Dumb WebSocket Relay
+## Architecture Overview
 
-Browser
-┌──────────────────────────────┐
-│ UI (JS / React)              │
-│                              │
-│ IndexedDB (append-only log)  │
-│        ▲                     │
-│        │                     │
-│ Go Core (WASM)               │
-│ - Ops                        │
-│ - Merge                      │
-│ - Crypto                     │
-└────────┬─────────────────────┘
-│
-▼
-Dumb WebSocket Relay
+```
+┌─────────────────────┐                    ┌─────────────────────┐
+│   Browser A         │                    │   Browser B         │
+│  ┌───────────────┐  │                    │  ┌───────────────┐  │
+│  │  UI (React)   │  │                    │  │  UI (React)   │  │
+│  └───────┬───────┘  │                    │  └───────┬───────┘  │
+│          │          │                    │          │          │
+│  ┌───────▼───────┐  │                    │  ┌───────▼───────┐  │
+│  │   Go (WASM)   │  │                    │  │   Go (WASM)   │  │
+│  │ ┌───────────┐ │  │                    │  │ ┌───────────┐ │  │
+│  │ │ Store     │ │  │                    │  │ │ Store     │ │  │
+│  │ │ Merge     │ │  │                    │  │ │ Merge     │ │  │
+│  │ │ Crypto    │ │  │                    │  │ │ Crypto    │ │  │
+│  │ └───────────┘ │  │                    │  │ └───────────┘ │  │
+│  └───────┬───────┘  │                    │  └───────┬───────┘  │
+│          │          │                    │          │          │
+│  ┌───────▼───────┐  │                    │  ┌───────▼───────┐  │
+│  │  IndexedDB    │  │                    │  │  IndexedDB    │  │
+│  │ (append-only) │  │                    │  │ (append-only) │  │
+│  └───────────────┘  │                    │  └───────────────┘  │
+└──────────┬──────────┘                    └──────────┬──────────┘
+           │                                          │
+           │ Encrypted ops                            │ Encrypted ops
+           │ (WebSocket)                              │ (WebSocket)
+           │                                          │
+           └──────────────┬───────────────────────────┘
+                          │
+                          ▼
+                 ┌────────────────┐
+                 │  Relay Server  │
+                 │   (Stateless)  │
+                 │                │
+                 │  • Broadcast   │
+                 │  • No storage  │
+                 │  • No auth     │
+                 └────────────────┘
+```
+
+**Key Points:**
+- Each client has its own local IndexedDB storage
+- Go core compiled to WASM runs in browser
+- Relay server just forwards encrypted operations
+- No server-side logic or state
 
 core/        → Pure database logic (Go)
 storage/     → File + IndexedDB backends

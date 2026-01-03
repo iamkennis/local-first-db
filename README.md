@@ -121,18 +121,34 @@ decentralized-db/
 
 ## How to Run
 
-### 1. Run relay server
-```bash
-go run cmd/relay/main.go
-```
+### Option 1: Browser Demo (WASM)
 
-### 2. Build WASM
 ```bash
+# 1. Build WASM binary
 GOOS=js GOARCH=wasm go build -o wasm/main.wasm ./wasm
+
+# 2. Copy Go WASM runtime (first time only)
+cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" wasm/
+
+# 3. Start local server
+go run cmd/local/main.go
+
+# 4. Open browser
+open http://localhost:8080
 ```
 
-### 3. Serve WASM
+### Option 2: Relay Server (for sync)
+
 ```bash
-serve ./wasm
+# Start WebSocket relay
+go run cmd/relay/main.go
+
+# Relay runs on ws://localhost:8080
+```
+
+### Test WASM in Browser Console
+
+```javascript
+helloFromGo()  // Returns: "Hello from Go WASM 🚀"
 ```
 

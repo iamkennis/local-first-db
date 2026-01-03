@@ -20,7 +20,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for p := range peers {
-			p.WriteMessage(websocket.TextMessage, msg)
+			p.WriteMessage(websocket.BinaryMessage, msg)
 		}
 	}
 }

@@ -1,4 +1,5 @@
 //go:build js && wasm
+
 package main
 
 import (
@@ -9,10 +10,20 @@ import (
 )
 
 var store = core.NewStore()
+var userKey = make([]byte, 32) // Will be set from JS
 
 func applyOp(this js.Value, args []js.Value) any {
+	encrypted := make([]byte, args[0].Length())
+	js.CopyBytesToGo(encrypted, args[0])
+
+	plain, err := core.Decrypt(userKey, encrypted)
+	if err != nil {
+		return nil
+	}
+
 	var op core.Operation
-	json.Unmarshal([]byte(args[0].String()), &op)
+	json.Unmarshal(plain, &op)
+
 	store.Apply(op)
 	return nil
 }

@@ -7,17 +7,28 @@ import (
 )
 
 func Encrypt(key, data []byte) ([]byte, error) {
-	block, _ := aes.NewCipher(key)
-	gcm, _ := cipher.NewGCM(block)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
 	nonce := make([]byte, gcm.NonceSize())
 	rand.Read(nonce)
+
 	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 
-func Decrypt(data, key []byte) ([]byte, error) {
+func Decrypt(key, data []byte) ([]byte, error) {
 	block, _ := aes.NewCipher(key)
 	gcm, _ := cipher.NewGCM(block)
 
-	nonceSize := gcm.NonceSize()
-	return gcm.Open(nil, data[:nonceSize], data[nonceSize:], nil)
+	nonce := data[:gcm.NonceSize()]
+	ciphertext := data[gcm.NonceSize():]
+
+	return gcm.Open(nil, nonce, ciphertext, nil)
 }

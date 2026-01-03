@@ -1,5 +1,27 @@
 # 🏗️ Architecture
 
+## Why append-only logs?
+They provide:
+- Immutability
+- Deterministic replay
+- Simple conflict resolution
+- Easy sync
+
+## Why local-first?
+- No loading spinners
+- Works offline
+- User owns data
+
+## Why WASM + Go?
+- Deterministic execution
+- Shared logic between backend and browser
+- Strong concurrency model
+
+## Why stateless servers?
+- Easier scaling
+- No trust required
+- Replaceable relays
+
 This document explains the core design decisions behind the decentralized database.
 
 ---

@@ -11,6 +11,7 @@ type Operation struct {
 	Key       string
 	Value     string
 	Timestamp int64
+	ActorID   string
 }
 
 func RandID() string {
@@ -26,4 +27,11 @@ func NewOp(key, value string) Operation {
 		Value:     value,
 		Timestamp: time.Now().UnixNano(),
 	}
+}
+
+func newer(a, b Operation) bool {
+	if a.Timestamp != b.Timestamp {
+		return a.Timestamp > b.Timestamp
+	}
+	return a.ActorID > b.ActorID 
 }

@@ -48,5 +48,36 @@ function sendOp(op) {
   ws.send(JSON.stringify(op))
 }
 </script>
+<script>
+function sendOp(op) {
+  encrypt(JSON.stringify(op), userKey).then(encrypted => {
+    ws.send(encrypted)
+  })
+}
+</script>
+<script>
+const userKey = crypto.getRandomValues(new Uint8Array(32)) // demo key
+
+async function encrypt(plain, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key,
+    "AES-GCM",
+    false,
+    ["encrypt"]
+  )
+
+  const cipher = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    cryptoKey,
+    new TextEncoder().encode(plain)
+  )
+
+  // iv + cipher
+  return new Uint8Array([...iv, ...new Uint8Array(cipher)])
+}
+</script>
 </body>
 </html>

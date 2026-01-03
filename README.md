@@ -84,6 +84,14 @@ Inspired by systems like Figma, Notion, Linear, and modern local-first architect
 - Relay server just forwards encrypted operations
 - No server-side logic or state
 
+## Design Guarantees
+
+- The server cannot read user data
+- Clients converge to the same state
+- Offline edits always sync
+- Conflicts resolve deterministically
+- Storage is append-only
+
 ### Project Structure
 
 ```

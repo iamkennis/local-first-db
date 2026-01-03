@@ -1,0 +1,6 @@
+*.log
+local
+relay
+*.wasm
+phase-1/
+.DS_Store

@@ -84,11 +84,38 @@ Inspired by systems like Figma, Notion, Linear, and modern local-first architect
 - Relay server just forwards encrypted operations
 - No server-side logic or state
 
-core/        → Pure database logic (Go)
-storage/     → File + IndexedDB backends
-sync/        → WebSocket protocol
-wasm/        → Go → WASM bridge
-cmd/relay/   → Stateless relay server
+### Project Structure
+
+```
+decentralized-db/
+├── core/                    # Pure CRDT logic (Go)
+│   ├── operation.go         # Operation definition
+│   ├── merge.go             # Deterministic conflict resolution
+│   ├── store.go             # Single-writer store
+│   ├── storage.go           # Storage interface
+│   ├── identity.go          # Device identity + keys
+│   └── crypto.go            # AES-GCM encryption
+│
+├── storage/
+│   ├── file/                # File-based persistence
+│   │   └── file_storage.go  # Append-only log
+│   └── indexeddb/           # Browser storage (WASM)
+│       └── indexeddb.js     # JS bridge to IndexedDB
+│
+├── sync/                    # Network sync
+│   ├── protocol.go          # Operation encoding
+│   └── client.go            # WebSocket client
+│
+├── wasm/                    # Browser build
+│   ├── main.go              # Go → WASM entry point
+│   └── index.html           # WASM loader
+│
+└── cmd/
+    ├── relay/               # WebSocket relay server
+    │   └── main.go          # Stateless broadcast
+    └── local/               # CLI demo app
+        └── main.go          # Test operations
+```
 
 ---
 

@@ -2,3 +2,4 @@
 *.wasm
 phase-1/
 .DS_Store
+main.wasm

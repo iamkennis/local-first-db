@@ -15,7 +15,7 @@ func Encrypt(key, data []byte) ([]byte, error) {
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
-	}
+	} 
 
 	nonce := make([]byte, gcm.NonceSize())
 	rand.Read(nonce)

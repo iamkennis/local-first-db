@@ -17,7 +17,7 @@ func NewStore() *Store {
 
 func (s *Store) Apply(op Operation) {
 	if s.snapshot != nil && op.Timestamp <= s.snapshot.LastTimestamp {
-		return // already included
+		return 
 	}
 
 	existing, ok := s.data[op.Key]

@@ -15,7 +15,6 @@ func Merge(a, b Operation) Operation {
 		return a
 	}
 
-	// Same timestamp → deterministic tie-breaker using ID
 	if b.ID > a.ID {
 		return b
 	}
